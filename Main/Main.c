@@ -307,7 +307,7 @@ void pageDisplay(pageData *pagedata)
 							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
 							print_strln(buffer);
 						break;
-						case 2:
+						case 2:                        //cpu温度
 							if(readFile( buffer, TempPath,5) == 0) break;
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -317,7 +317,20 @@ void pageDisplay(pageData *pagedata)
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 3:
+						case 3:                    //CPU使用率
+							getShell(buffer,Cpuload,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 4:                 
 							getShell(buffer,FreqPath,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -330,18 +343,21 @@ void pageDisplay(pageData *pagedata)
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 4:                    //IP地址
+						case 5:                    //IP地址
 							sprintf(cmd, \
-							"ifconfig %s|awk -F '[ :]+' 'NR==2 {print $3}'", \
-							getJsonStr(dispjson,"port"));
+								"ip -o -4 addr show %s 2>/dev/null | awk '{print $4}' | cut -d/ -f1 || echo 'No connection'", \
+								getJsonStr(dispjson,"port"));
 							getShell(buffer,cmd,16);
+							if(strcmp(buffer, "") == 0 || strcmp(buffer, "No connection") == 0) {
+								strcpy(buffer, "No connection");
+							}
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
 							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 5:                    //总内存
+						case 6:                    //总内存
 							getShell(buffer,TotMem,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -349,12 +365,12 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/1024);
+								sprintf(buffer,"%.2f",(float)temp/1024);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 6:                    //使用内存
+						case 7:                    //使用内存
 							getShell(buffer,UseMem,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -362,12 +378,25 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/1024);
+								sprintf(buffer,"%.2f",(float)temp/1024);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 7:                    //总EMMC
+						case 8:                    //内存百分比
+							getShell(buffer,MemPer,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 9:                    //总EMMC
 							getShell(buffer,TotEmmc,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -375,12 +404,12 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/1024);
+								sprintf(buffer,"%.2f",(float)temp/1024);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 8:                    //己用EMMC
+						case 10:                    //己用EMMC
 							getShell(buffer,UseEmmc,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -388,12 +417,155 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/1024);
+								sprintf(buffer,"%.2f",(float)temp/1024);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 9:                    //RX网卡
+						case 11:                    //EMMC百分比
+							getShell(buffer,EmmcPer,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 12:                    //SDA总
+							getShell(buffer,TotSda,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 13:                    //SDA使用
+							getShell(buffer,UseSda,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 14:                    //SDA未使用
+							getShell(buffer,SdaAva,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 15:                    //SDA使用率
+							getShell(buffer,SdaPer,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 16:                    //SDB总
+							getShell(buffer,TotSdb,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 17:                    //SDB使用
+							getShell(buffer,UseSdb,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.2f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 18:                    //SDB未使用
+							getShell(buffer,SdbAva,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.2f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 19:                    //SDB使用率
+							getShell(buffer,SdbPer,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.1f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 20:                    //RX网卡Eth0
+							getShell(buffer,RxEth0,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.2f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 21:                    //TX网卡 Eth0
+							getShell(buffer,TxEth0,5);
+							setTextSize(getJsonNumInt(dispjson,"size"));
+							setTextColor(getJsonNumInt(dispjson,"color"));
+							setCursor(getJsonNumInt(dispjson,"x0"),getJsonNumInt(dispjson,"y0"));
+							if(getJsonNumInt(dispjson,"class"))
+							{
+								temp = atol(buffer);
+								sprintf(buffer,"%.2f",(float)temp);
+							}
+							buffer[getJsonNumInt(dispjson,"base")] = '\0';
+							print_str(buffer);
+						break;
+						case 22:                    //RX网卡Wlan
 							getShell(buffer,RxWlan,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -401,12 +573,12 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/10);
+								sprintf(buffer,"%.2f",(float)temp);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
 						break;
-						case 10:                    //TX网卡
+						case 23:                    //TX网卡 Wlan
 							getShell(buffer,TxWlan,5);
 							setTextSize(getJsonNumInt(dispjson,"size"));
 							setTextColor(getJsonNumInt(dispjson,"color"));
@@ -414,7 +586,7 @@ void pageDisplay(pageData *pagedata)
 							if(getJsonNumInt(dispjson,"class"))
 							{
 								temp = atol(buffer);
-								sprintf(buffer,"%f",(float)temp/10);
+								sprintf(buffer,"%.2f",(float)temp);
 							}
 							buffer[getJsonNumInt(dispjson,"base")] = '\0';
 							print_str(buffer);
